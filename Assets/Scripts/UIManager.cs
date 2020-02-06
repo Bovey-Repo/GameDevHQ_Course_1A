@@ -23,7 +23,6 @@ public class UIManager : MonoBehaviour
 
     private float _flickerDelay = 0.5f;
 
-    // Start is called before the first frame update
     private void Start()
     {
         _gameOverText.SetActive(false);

@@ -10,7 +10,6 @@ public class PowerUp : MonoBehaviour
     [SerializeField]
     private int _powerUpID;
 
-    // Update is called once per frame
     void Update()
     {
         transform.Translate(Vector3.down * _speed * Time.deltaTime);

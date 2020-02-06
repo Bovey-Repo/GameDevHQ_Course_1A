@@ -14,12 +14,6 @@ public class SpawnManager : MonoBehaviour
     
     private bool _canSpawn = true;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     IEnumerator SpawnEnemy()
     {
         yield return new WaitForSeconds(2.5f);
