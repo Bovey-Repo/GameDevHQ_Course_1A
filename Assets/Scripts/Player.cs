@@ -5,7 +5,16 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField]
-    private float _speed = 5;
+    private float _speed = 5.0f;
+    private float _speedBoost = 3.5f;
+    private float _thrusterBoost = 2.5f;
+    [SerializeField]
+    private float _thruster = 10.0F;
+    [SerializeField]
+    private float _thrusterRate = 7.5f;
+    private bool _thrusterOn = false;
+    private bool _thrusterCharged = true;
+
     [SerializeField]
     private int _lives = 3;
     private SpawnManager _spawnManger;
@@ -13,21 +22,21 @@ public class Player : MonoBehaviour
     [SerializeField]
     private int _score;
 
-    [SerializeField]
-    private float _fireDelay = 0.2f;
     private float _nextFireTime = 0.0f;
-
     [SerializeField]
     private GameObject _laserPrefab;
     [SerializeField]
     private float _laserOffsetY = 1.0f;
     [SerializeField]
     private AudioClip _laserSound;
+    [SerializeField]
+    private AudioClip _outOfAmmo;
     private AudioSource _audioSource;
 
     private bool _isShieldUp = false;
     [SerializeField]
     private GameObject _shield;
+    private int _shieldStrength = 3;
 
     private bool _isTripleShotUp = false;
     [SerializeField]
@@ -42,6 +51,8 @@ public class Player : MonoBehaviour
     private GameObject[] _damage;
     [SerializeField]
     private GameObject _explosionPrefab;
+
+    private Weapon _laser;
  
     void Start()
     {
@@ -64,37 +75,94 @@ public class Player : MonoBehaviour
         }
   
         transform.position = new Vector3(0, -3.5f, 0);
+        _laser = new Weapon("Laser", 0.2f, 15);
+
+        _uiManager.SetWeaponText(_laser.name, _laser.ammoCount);
+
     }
 
     void Update()
     {
-        Movement();
 
         if (Input.GetKeyDown(KeyCode.Space)  && Time.time > _nextFireTime)
         {
-            _nextFireTime = Time.time + _fireDelay;
+            _nextFireTime = Time.time + _laser.fireRate;
             FireLaser();
         }
+
+        CheckThruster();
+
+        Movement();
+    }
+
+    private void CheckThruster()
+    {
+        if (Input.GetKey(KeyCode.LeftShift) && _thrusterCharged)
+        {
+            _thruster -= _thrusterRate * Time.deltaTime;
+
+            if (!_thrusterOn)
+            {
+                _speed += _thrusterBoost;
+                _thrusterOn = true;
+            }
+
+            if (_thruster <= 0.0f)
+            {
+                _thruster = 0.0f;
+                _thrusterCharged = false;
+                if (_thrusterOn)
+                {
+                    _speed -= _thrusterBoost;
+                    _thrusterOn = false;
+                }
+                StartCoroutine(ThrusterCharging()); // delay before re-use
+            }
+        } 
+        else
+        {
+            _thruster += (_thrusterRate / 4) * Time.deltaTime;
+            if (_thruster >= 10)
+            {
+                _thruster = 10.0f;
+            }
+        }
+        
+        if (Input.GetKeyUp(KeyCode.LeftShift) && _thrusterOn)
+        {
+            _speed -= _thrusterBoost; 
+            _thrusterOn = false;
+        }
+
+        _uiManager.SetThrusterBar(_thruster);
     }
 
     private void FireLaser()
     {
-        if (_isTripleShotUp)
+        if (_laser.ammoCount > 0)
         {
-            _laserOffsetY = 0.0f;
-            Vector3 laserSpawnPos = new Vector3(transform.position.x, transform.position.y + _laserOffsetY, transform.position.z);
-            Instantiate(_tripleShotPrefab, laserSpawnPos, Quaternion.identity);
+            if (_isTripleShotUp)
+            {
+                _laserOffsetY = 0.0f;
+                Vector3 laserSpawnPos = new Vector3(transform.position.x, transform.position.y + _laserOffsetY, transform.position.z);
+                Instantiate(_tripleShotPrefab, laserSpawnPos, Quaternion.identity);
+            }
+            else
+            {
+                _laserOffsetY = 1.0f;
+                Vector3 laserSpawnPos = new Vector3(transform.position.x, transform.position.y + _laserOffsetY, transform.position.z);
+                Instantiate(_laserPrefab, laserSpawnPos, Quaternion.identity);
+            }
+            _audioSource.clip = _laserSound;
+            _audioSource.Play();
+            _laser.ammoCount--;
+            _uiManager.SetWeaponText(_laser.name, _laser.ammoCount);
         }
         else
         {
-            _laserOffsetY = 1.0f;
-            Vector3 laserSpawnPos = new Vector3(transform.position.x, transform.position.y + _laserOffsetY, transform.position.z);
-            Instantiate(_laserPrefab, laserSpawnPos, Quaternion.identity);
+            _audioSource.clip = _outOfAmmo;
+            _audioSource.Play();
         }
-
-        _audioSource.clip = _laserSound;
-        _audioSource.Play();
-
     }
     
     private void Movement()
@@ -120,8 +188,14 @@ public class Player : MonoBehaviour
     {
         if (_isShieldUp)
         {
-            _shield.SetActive(false);
-            _isShieldUp = false;
+            _shieldStrength--;
+            _uiManager.SetShieldsBar(_shieldStrength);
+            if (_shieldStrength <= 0)
+            {
+                _shield.SetActive(false);
+                _isShieldUp = false;
+            }
+
         }
         else
         {
@@ -172,7 +246,7 @@ public class Player : MonoBehaviour
     {
         _audioSource.clip = _powerUpSound;
         _audioSource.Play();
-        _speed = 8.5f;
+        _speed += _speedBoost;
         StartCoroutine(SpeedBoostTimer());
 
     }
@@ -182,6 +256,10 @@ public class Player : MonoBehaviour
         _audioSource.clip = _powerUpSound;
         _audioSource.Play();
         _isShieldUp = true;
+        if (_shieldStrength != 3)
+        {
+            _shieldStrength = 3;
+        }
         _shield.SetActive(true);
     }
 
@@ -200,7 +278,17 @@ public class Player : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(_powerUpTime);
-            _speed = 5.0f;
+            _speed -= _speedBoost;
+        }
+
+    }
+
+    IEnumerator ThrusterCharging()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(15.0f);
+            _thrusterCharged = true;
         }
 
     }
