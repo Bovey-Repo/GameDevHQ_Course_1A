@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -7,7 +6,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _speed = 5.0f;
     private float _speedBoost = 3.5f;
-    private float _thrusterBoost = 2.5f;
+    private float _thrusterBoost = 4.5f;
     [SerializeField]
     private float _thruster = 10.0F;
     [SerializeField]
@@ -21,6 +20,7 @@ public class Player : MonoBehaviour
     private UIManager _uiManager;
     [SerializeField]
     private int _score;
+    private CameraShake _cameraShake;
 
     private float _nextFireTime = 0.0f;
     [SerializeField]
@@ -73,6 +73,12 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("Player: AudioSource is NULL");
         }
+
+        _cameraShake = GameObject.Find("Main Camera").GetComponent<CameraShake>();
+        if (_cameraShake == null)
+        {
+            Debug.LogError("Player: CameraShake is NULL");
+        }
   
         transform.position = new Vector3(0, -3.5f, 0);
         _laser = new Weapon("Laser", 0.2f, 15);
@@ -90,14 +96,26 @@ public class Player : MonoBehaviour
             FireLaser();
         }
 
-        CheckThruster();
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            SetThrusterOn();
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            SetThrusterOff();
+        }
+
+        if (_thruster < 10 && !_thrusterOn)
+        {
+            ThrusterCharge();
+        }
 
         Movement();
     }
 
-    private void CheckThruster()
+    private void SetThrusterOn()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && _thrusterCharged)
+        if (_thrusterCharged)
         {
             _thruster -= _thrusterRate * Time.deltaTime;
 
@@ -118,23 +136,30 @@ public class Player : MonoBehaviour
                 }
                 StartCoroutine(ThrusterCharging()); // delay before re-use
             }
-        } 
-        else
-        {
-            _thruster += (_thrusterRate / 4) * Time.deltaTime;
-            if (_thruster >= 10)
-            {
-                _thruster = 10.0f;
-            }
         }
         
-        if (Input.GetKeyUp(KeyCode.LeftShift) && _thrusterOn)
+        _uiManager.SetThrusterBar(_thruster);
+    }
+
+    private void ThrusterCharge()
+    {
+        _thruster += (_thrusterRate / 4) * Time.deltaTime;
+        if (_thruster >= 10.0f)
         {
-            _speed -= _thrusterBoost; 
-            _thrusterOn = false;
+            _thruster = 10.0f;
         }
 
         _uiManager.SetThrusterBar(_thruster);
+    }
+
+    private void SetThrusterOff()
+    {
+        if (_thrusterOn)
+        {
+            _speed -= _thrusterBoost;
+            _thrusterOn = false;
+        }
+
     }
 
     private void FireLaser()
@@ -195,25 +220,27 @@ public class Player : MonoBehaviour
                 _shield.SetActive(false);
                 _isShieldUp = false;
             }
-
         }
         else
         {
-            UpdateLives();
+            StartCoroutine(_cameraShake.ShakeCamera(0.5f, 0.25f));  
+            RemoveLife();
         }
     }
 
-    private void UpdateLives()
+    private void RemoveLife()
     {
         _lives -= 1;
-        _uiManager.SetLivesImage(_lives);
 
         if (_lives > 0)
         {
             _damage[_lives - 1].SetActive(true);
+            _uiManager.SetLivesImage(_lives);
         }
-        else if (_lives == 0)
+        else if (_lives <= 0)
         {
+            _lives = 0;
+            _uiManager.SetLivesImage(_lives);
             GameOver();
         }
     }
@@ -231,6 +258,26 @@ public class Player : MonoBehaviour
     {
         _score += scoreToAdd;
         _uiManager.SetScoreText(_score);
+    }
+
+    public void AddLife()
+    {
+        if (_lives < 3)
+        {
+            _audioSource.clip = _powerUpSound;
+            _audioSource.Play();
+            _damage[_lives - 1].SetActive(false);
+            _lives += 1;
+            _uiManager.SetLivesImage(_lives);
+        }
+    }
+
+    public void AddAmmo()
+    {
+        _audioSource.clip = _powerUpSound;
+        _audioSource.Play();
+        _laser.ammoCount = 15;
+        _uiManager.SetWeaponText("Laser", _laser.ammoCount);
     }
 
     public void TripleShotActive()
@@ -260,36 +307,25 @@ public class Player : MonoBehaviour
         {
             _shieldStrength = 3;
         }
+        _uiManager.SetShieldsBar(_shieldStrength);
         _shield.SetActive(true);
     }
 
     IEnumerator TripleShotTimer()
     {
-        while(true)
-        {
-            yield return new WaitForSeconds(_powerUpTime);
-            _isTripleShotUp = false;
-        }
-
+        yield return new WaitForSeconds(_powerUpTime);
+        _isTripleShotUp = false;
     }
 
     IEnumerator SpeedBoostTimer()
     {
-        while (true)
-        {
-            yield return new WaitForSeconds(_powerUpTime);
-            _speed -= _speedBoost;
-        }
-
-    }
+        yield return new WaitForSeconds(_powerUpTime);
+        _speed -= _speedBoost;
+     }
 
     IEnumerator ThrusterCharging()
     {
-        while (true)
-        {
-            yield return new WaitForSeconds(15.0f);
-            _thrusterCharged = true;
-        }
-
+        yield return new WaitForSeconds(15.0f);
+        _thrusterCharged = true;
     }
 }

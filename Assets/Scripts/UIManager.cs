@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -66,7 +65,7 @@ public class UIManager : MonoBehaviour
 
     public void SetLivesImage(int currLives)
     {
-        _lives.sprite = _livesSprites[currLives];
+         _lives.sprite = _livesSprites[currLives];
     }
 
     public void ShowGameOver()

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyLaser : MonoBehaviour
 {
@@ -31,6 +29,7 @@ public class EnemyLaser : MonoBehaviour
         if (other.tag == "Player")
         {
             _player.Damage();
+            Destroy(this.gameObject);
         }
     }
 }

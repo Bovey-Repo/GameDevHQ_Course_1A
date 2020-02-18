@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {
@@ -40,12 +38,16 @@ public class PowerUp : MonoBehaviour
                     case 2:
                         p.ShieldActive();
                         break;
+                    case 3:
+                        p.AddAmmo();
+                        break;
+                    case 4:
+                        p.AddLife();
+                        break;
                     default:
                         Debug.LogError("PowerUP CS: Unknown _powerUpID" + this._powerUpID);
                         break;
                 }
-
-                
             }
 
             Destroy(this.gameObject);
