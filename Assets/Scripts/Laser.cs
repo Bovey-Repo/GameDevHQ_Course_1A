@@ -9,10 +9,13 @@ public class Laser : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(Vector3.up * _speed * Time.deltaTime);
-        if (transform.position.y > 7.5f)
+
+        transform.Translate(Vector2.up * _speed * Time.deltaTime);
+        if (transform.position.y > 7.5f || transform.position.x > 11.0f || transform.position.x < -11.0f)
+        // x & y checks added to cope with StarBurst powerup
         {
             Destroy(this.gameObject);
         }
+ 
     }
 }

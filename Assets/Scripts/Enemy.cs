@@ -59,12 +59,11 @@ public class Enemy : MonoBehaviour
 
         if (other.tag == "Player")
         {
-            _player.Damage();
             if (_isAlive)
             {
+                _player.Damage();
                 DestroyEnemy();
             }
-
         }
     }
 

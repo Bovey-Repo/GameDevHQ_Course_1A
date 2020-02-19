@@ -16,7 +16,6 @@ public class PowerUp : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
-        
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -43,6 +42,9 @@ public class PowerUp : MonoBehaviour
                         break;
                     case 4:
                         p.AddLife();
+                        break;
+                    case 5:
+                        p.StarBurstActive();
                         break;
                     default:
                         Debug.LogError("PowerUP CS: Unknown _powerUpID" + this._powerUpID);

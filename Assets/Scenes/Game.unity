@@ -437,7 +437,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 5b17a0088dcdf924fa92da5af1e1be07, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.751
+  m_Volume: 0.66
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -703,12 +703,29 @@ MonoBehaviour:
   _enemyPrefab: {fileID: 6666414446779670863, guid: e44c7b9ece99c2f419926c443fadf9ee,
     type: 3}
   _enemyContainer: {fileID: 838941001}
-  _powerUp:
-  - {fileID: 890864368975682849, guid: 68974cf16afa5544794d9323602cc3dd, type: 3}
-  - {fileID: 2937802535590259057, guid: 66ed61ea4d8764442851ec5f29a341a8, type: 3}
-  - {fileID: 8600341230546682694, guid: 92108069ba36cab4a9a542c1e34e2edc, type: 3}
-  - {fileID: 3568526153401382852, guid: 41725172d5530a747a215eab831bfabc, type: 3}
-  - {fileID: 545274349184283853, guid: 64faeedc6110624479a810aaf0edbe33, type: 3}
+  _powerUps:
+  - prefab: {fileID: 3568526153401382852, guid: 41725172d5530a747a215eab831bfabc,
+      type: 3}
+    chance: 50
+    description: Restore ammo to full
+  - prefab: {fileID: 545274349184283853, guid: 64faeedc6110624479a810aaf0edbe33, type: 3}
+    chance: 40
+    description: 'Restore 1 life '
+  - prefab: {fileID: 8600341230546682694, guid: 92108069ba36cab4a9a542c1e34e2edc,
+      type: 3}
+    chance: 40
+    description: Adds 3 shot shield to player for limited time
+  - prefab: {fileID: 2937802535590259057, guid: 66ed61ea4d8764442851ec5f29a341a8,
+      type: 3}
+    chance: 40
+    description: Increases player speed for limited time
+  - prefab: {fileID: 5799366118261253744, guid: 22e5a8f3d97a58842b597661f590ad78,
+      type: 3}
+    chance: 10
+    description: Fires spray of lasers for limited time
+  - prefab: {fileID: 890864368975682849, guid: 68974cf16afa5544794d9323602cc3dd, type: 3}
+    chance: 40
+    description: Fires 3 lasers for limited time
 --- !u!4 &628292183
 Transform:
   m_ObjectHideFlags: 0
@@ -792,7 +809,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Press the "R" key to restart the level.
+  m_Text: 'Press the "R" key to restart the level
+
+    or "Esc" key to quit to main
+    menu.'
 --- !u!222 &817114663
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1162,7 +1182,7 @@ PrefabInstance:
     - target: {fileID: 3908258706922661496, guid: 6a6997c945d2f784cbbe5946782a3810,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3908258706922661496, guid: 6a6997c945d2f784cbbe5946782a3810,
         type: 3}
@@ -1224,6 +1244,12 @@ PrefabInstance:
       propertyPath: _cameraShake
       value: 
       objectReference: {fileID: 1631627518}
+    - target: {fileID: 3908258706922661502, guid: 6a6997c945d2f784cbbe5946782a3810,
+        type: 3}
+      propertyPath: _starBurstPrefab
+      value: 
+      objectReference: {fileID: 7306745287970289821, guid: 0fd400a3d3c0261438493c8748ac7b61,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6a6997c945d2f784cbbe5946782a3810, type: 3}
 --- !u!1 &1428958095

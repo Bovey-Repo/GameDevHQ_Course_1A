@@ -8,19 +8,20 @@ public class SpawnManager : MonoBehaviour
     private GameObject _enemyPrefab;
     [SerializeField]
     private GameObject _enemyContainer;
-
     [SerializeField]
-    private GameObject[] _powerUp;
+    private PowerUpObj[] _powerUps;
     
+    private List<PowerUpObj> pList = new List<PowerUpObj>();
     private bool _canSpawn = true;
+    private int _chance;
 
     IEnumerator SpawnEnemy()
     {
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(2.5f); // delay the spawning for 2.5 seconds after game start
 
         while(_canSpawn)
         {
-            Vector3 enemyPos = new Vector3(Random.Range(-8.5f, 8.5f), 7.0f, 0);
+            Vector2 enemyPos = new Vector2(Random.Range(-8.5f, 8.5f), 7.0f);
             GameObject spawnedEnemy = Instantiate(_enemyPrefab, enemyPos, Quaternion.identity);
             spawnedEnemy.transform.parent = _enemyContainer.transform;
 
@@ -31,15 +32,45 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnPowerup()
     {
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(2.5f); // delay the spawning for 2.5 seconds after game start
 
         while (_canSpawn)
         {
-            Vector3 powerUpPos = new Vector3(Random.Range(-8.5f, 8.5f), 7.0f, 0);
+            ChoosePowerUps();
 
-            Instantiate(_powerUp[Random.Range(0, _powerUp.Length)], powerUpPos, Quaternion.identity);
+            GameObject powerUpToSpawn = pList[Random.Range(0, pList.Count)].prefab;
+            Vector2 powerUpPos = new Vector2(Random.Range(-8.5f, 8.5f), 7.0f);
+
+            Instantiate(powerUpToSpawn, powerUpPos, Quaternion.identity);
+            pList.Clear();
 
             yield return new WaitForSeconds(Random.Range(5.0f, 15.0f));
+        }
+    }
+
+    private void ChoosePowerUps()
+    {
+        int randomChance = Random.Range(1, 101);
+
+        if (randomChance >= 1 && randomChance <= 10)
+        {
+            _chance = 10;
+        }
+        else if (randomChance >= 11 && randomChance <= 50)
+        {
+            _chance = 40;
+        }
+        else
+        {
+            _chance = 50;
+        }
+
+        foreach (var p in _powerUps)
+        {
+            if (_chance == p.chance)
+            {
+                pList.Add(p);
+            }
         }
     }
 

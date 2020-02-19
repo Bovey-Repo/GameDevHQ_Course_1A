@@ -42,6 +42,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _tripleShotPrefab;
 
+    private bool _isStarBurstUp = false;
+    [SerializeField]
+    private GameObject _starBurstPrefab;
+
     [SerializeField]
     private float _powerUpTime = 5.0f;
     [SerializeField]
@@ -169,13 +173,19 @@ public class Player : MonoBehaviour
             if (_isTripleShotUp)
             {
                 _laserOffsetY = 0.0f;
-                Vector3 laserSpawnPos = new Vector3(transform.position.x, transform.position.y + _laserOffsetY, transform.position.z);
+                Vector2 laserSpawnPos = new Vector2(transform.position.x, transform.position.y + _laserOffsetY);
                 Instantiate(_tripleShotPrefab, laserSpawnPos, Quaternion.identity);
+            }
+            else if (_isStarBurstUp)
+            {
+                _laserOffsetY = 0.0f;
+                Vector2 laserSpawnPos = new Vector2(transform.position.x, transform.position.y + _laserOffsetY);
+                Instantiate(_starBurstPrefab, laserSpawnPos, Quaternion.identity);
             }
             else
             {
                 _laserOffsetY = 1.0f;
-                Vector3 laserSpawnPos = new Vector3(transform.position.x, transform.position.y + _laserOffsetY, transform.position.z);
+                Vector2 laserSpawnPos = new Vector2(transform.position.x, transform.position.y + _laserOffsetY);
                 Instantiate(_laserPrefab, laserSpawnPos, Quaternion.identity);
             }
             _audioSource.clip = _laserSound;
@@ -289,6 +299,15 @@ public class Player : MonoBehaviour
         
     }
 
+    public void StarBurstActive()
+    {
+        _audioSource.clip = _powerUpSound;
+        _audioSource.Play();
+        _isStarBurstUp = true;
+        StartCoroutine(StarBurstTimer());
+
+    }
+
     public void SpeedBoostActive()
     {
         _audioSource.clip = _powerUpSound;
@@ -327,5 +346,11 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(15.0f);
         _thrusterCharged = true;
+    }
+
+    IEnumerator StarBurstTimer()
+    {
+        yield return new WaitForSeconds(_powerUpTime);
+        _isStarBurstUp = false;
     }
 }
